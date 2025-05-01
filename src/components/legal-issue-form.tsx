@@ -30,7 +30,7 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
   const form = useForm<LegalIssueFormInput>({
     resolver: zodResolver(legalIssueSchema),
     defaultValues: {
-      description: "",
+      scenario: "", // Updated default value name
       keywords: "",
     },
   });
@@ -46,10 +46,10 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
       <form onSubmit={form.handleSubmit(processSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="description"
+          name="scenario" // Updated field name
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Describe your legal issue</FormLabel>
+              <FormLabel>Describe the scenario</FormLabel> {/* Updated label */}
               <FormControl>
                 <Textarea
                   placeholder="Example: The police stopped me and asked to see my phone..."
@@ -59,8 +59,8 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
                 />
               </FormControl>
               <FormDescription>
-                Provide as much detail as possible about the situation.
-              </FormDescription>
+                Provide as much detail as possible about what happened.
+              </FormDescription> {/* Updated description */}
               <FormMessage />
             </FormItem>
           )}
@@ -79,8 +79,8 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
                 />
               </FormControl>
               <FormDescription>
-                List comma-separated keywords relevant to your issue.
-              </FormDescription>
+                List comma-separated keywords relevant to the scenario.
+              </FormDescription> {/* Updated description */}
               <FormMessage />
             </FormItem>
           )}
@@ -92,7 +92,7 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
               Analyzing...
             </>
           ) : (
-            "Analyze My Issue"
+            "Analyze My Situation" // Updated button text
           )}
         </Button>
       </form>
