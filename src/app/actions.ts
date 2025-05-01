@@ -4,17 +4,16 @@
 import { z } from "zod";
 import { understandLegalIssue } from "@/ai/flows/understand-legal-issue";
 import { generateLegalFlowchart } from "@/ai/flows/generate-legal-flowchart";
+import { refineLegalIssue } from "@/ai/flows/refine-legal-issue"; // Import the new refinement flow
 // Import types and schemas from the new central location
 import type {
   UnderstandLegalIssueInput,
-  // UnderstandLegalIssueOutput, // No longer needed directly here if ActionResponse uses it
   GenerateLegalFlowchartInput,
-  // GenerateLegalFlowchartOutput // No longer needed directly here if ActionResponse uses it
+  RefineLegalIssueInput, // Import the input type for refinement
 } from "@/ai/schemas/legal-issue-types";
 // Import form/action related types and schemas from the new types file
-import type { LegalIssueFormInput, ActionResponse } from "@/app/types";
-import { legalIssueSchema } from "@/app/types";
-
+import type { LegalIssueFormInput, ActionResponse, RefineInput } from "@/app/types"; // Import RefineInput
+import { legalIssueSchema, RefineInputSchema } from "@/app/types"; // Import RefineInputSchema
 
 /**
  * Server action to call the understandLegalIssue GenAI flow.
@@ -23,9 +22,9 @@ export async function handleUnderstandLegalIssue(data: LegalIssueFormInput): Pro
   try {
     // Validate form input against the schema
     const validatedData = legalIssueSchema.parse(data);
-    // Prepare input for the AI flow - updated to use 'scenario'
+    // Prepare input for the AI flow
     const input: UnderstandLegalIssueInput = {
-      scenario: validatedData.scenario, // Use scenario field
+      scenario: validatedData.scenario,
       keywords: validatedData.keywords,
     };
     console.log("Calling understandLegalIssue with input:", input);
@@ -35,25 +34,61 @@ export async function handleUnderstandLegalIssue(data: LegalIssueFormInput): Pro
     if (result && 'legalAnalysis' in result && 'safetyIndicator' in result) {
        return { success: true, data: result };
     } else {
-        // Handle cases where the output might be missing expected fields
         console.error("Received unexpected data format from understandLegalIssue:", result);
         return { success: false, message: "Received unexpected data format from analysis.", data: null };
     }
   } catch (error) {
     console.error("Error in handleUnderstandLegalIssue:", error);
-     // Handle Zod validation errors specifically if desired
      if (error instanceof z.ZodError) {
         return { success: false, message: "Invalid input data.", error: error.flatten() };
      }
-    // Ensure a generic error message for other errors
     const message = error instanceof Error ? error.message : "An unknown error occurred.";
     return { success: false, message: `Failed to understand legal issue: ${message}`, error };
   }
 }
 
 /**
+ * Server action to call the refineLegalIssue GenAI flow.
+ */
+export async function handleRefineLegalIssue(data: RefineInput): Promise<ActionResponse> {
+  try {
+    // Validate the refinement input against its schema
+    const validatedData = RefineInputSchema.parse(data);
+
+    // Prepare input for the AI refinement flow
+    const input: RefineLegalIssueInput = {
+      originalScenario: validatedData.originalScenario,
+      originalKeywords: validatedData.originalKeywords,
+      questionsAndAnswers: validatedData.questionsAndAnswers,
+    };
+
+    console.log("Calling refineLegalIssue with input:", input);
+    const result = await refineLegalIssue(input); // Call the refinement flow
+    console.log("Received result from refineLegalIssue:", result);
+
+    // The output structure is the same as UnderstandLegalIssueOutput
+    if (result && 'legalAnalysis' in result && 'safetyIndicator' in result) {
+       return { success: true, data: result }; // Return the refined data
+    } else {
+        console.error("Received unexpected data format from refineLegalIssue:", result);
+        return { success: false, message: "Received unexpected data format from refinement.", data: null };
+    }
+  } catch (error) {
+    console.error("Error in handleRefineLegalIssue:", error);
+     if (error instanceof z.ZodError) {
+        return { success: false, message: "Invalid input data for refinement.", error: error.flatten() };
+     }
+    const message = error instanceof Error ? error.message : "An unknown error occurred.";
+    return { success: false, message: `Failed to refine legal issue: ${message}`, error };
+  }
+}
+
+
+/**
  * Server action to call the generateLegalFlowchart GenAI flow.
  * This requires input matching GenerateLegalFlowchartInput.
+ * Note: This flow is likely redundant now as flowchart generation is part of understand/refine flows.
+ * Consider removing if not used independently.
  */
 export async function handleGenerateFlowchart(data: GenerateLegalFlowchartInput): Promise<ActionResponse> {
   try {
