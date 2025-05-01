@@ -10,7 +10,7 @@ import type { LegalIssueFormInput, ActionResponse, RefineInput } from "@/app/typ
 import type { UnderstandLegalIssueOutput, MCQ } from "@/ai/schemas/legal-issue-types"; // Import MCQ type
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Scale } from 'lucide-react'; // Icon for Ius
+import { Scale } from 'lucide-react'; // Icon for Dadgah (using Scale for now)
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 
 export default function Home() {
@@ -166,7 +166,7 @@ export default function Home() {
            <div className="inline-flex items-center justify-center p-3 bg-primary/10 border border-primary/20 rounded-full mb-4">
              <Scale className="h-10 w-10 text-primary" />
            </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">Ius</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">Dadgah</h1> {/* Updated Name */}
           <p className="text-lg text-muted-foreground">Understand Your Rights in India, Instantly.</p> {/* Updated tagline */}
         </header>
 

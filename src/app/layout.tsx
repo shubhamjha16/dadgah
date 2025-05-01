@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Ius - Understand Your Rights', // Updated title
-  description: 'Get instant legal analysis and understand your rights.', // Updated description
+  title: 'Dadgah - Understand Your Rights', // Updated title
+  description: 'Get instant legal analysis and understand your rights in India.', // Updated description
 };
 
 export default function RootLayout({
