@@ -50,12 +50,17 @@ const SafetyIndicatorBadge: React.FC<{ indicator: UnderstandLegalIssueOutput['sa
 
 export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: LegalAnalysisDisplayProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Start with the first question
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null); // Use null to indicate questions not started or finished
 
   // Reset answers and index when analysis changes
   useEffect(() => {
     setSelectedAnswers({});
-    setCurrentQuestionIndex(0); // Reset to the first question
+    // Start questions only if there are questions in the new analysis
+    if (analysis?.clarifyingQuestions && analysis.clarifyingQuestions.length > 0) {
+      setCurrentQuestionIndex(0); // Start at the first question
+    } else {
+      setCurrentQuestionIndex(null); // No questions or finished
+    }
   }, [analysis]);
 
   const handleAnswerChange = (questionIndex: number, optionValue: string) => {
@@ -66,14 +71,23 @@ export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: L
   };
 
   const handleNextQuestion = () => {
-    setCurrentQuestionIndex(prev => prev + 1);
+    if (currentQuestionIndex !== null) {
+       const nextIndex = currentQuestionIndex + 1;
+       const totalQuestions = analysis?.clarifyingQuestions?.length ?? 0;
+       if (nextIndex < totalQuestions) {
+           setCurrentQuestionIndex(nextIndex);
+       } else {
+           setCurrentQuestionIndex(null); // Indicate questions are finished
+       }
+    }
   };
 
   const handleRefineClick = () => {
-    // Ensure all questions are answered before submitting (though the button logic should prevent this)
+    // Ensure all questions are answered before submitting
     const numQuestions = analysis?.clarifyingQuestions?.length ?? 0;
-    if (Object.keys(selectedAnswers).length === numQuestions) {
+    if (numQuestions > 0 && Object.keys(selectedAnswers).length === numQuestions) {
       onRefineSubmit(selectedAnswers);
+       setCurrentQuestionIndex(null); // Indicate questions finished after submitting for refinement
     } else {
         console.error("Attempted to refine without all answers selected.");
         // Optionally show a toast message here
@@ -98,14 +112,20 @@ export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: L
   const clarifyingQuestions = analysis?.clarifyingQuestions;
   const totalQuestions = clarifyingQuestions?.length ?? 0;
   const hasQuestions = totalQuestions > 0;
-  const currentQuestion: MCQ | undefined = hasQuestions ? clarifyingQuestions?.[currentQuestionIndex] : undefined;
-  const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
-  const currentAnswer = selectedAnswers[currentQuestionIndex];
+  // Check if questions are currently being asked
+  const askingQuestions = currentQuestionIndex !== null;
+
+  const currentQuestion: MCQ | undefined = askingQuestions ? clarifyingQuestions?.[currentQuestionIndex!] : undefined;
+  const isLastQuestion = askingQuestions && currentQuestionIndex === totalQuestions - 1;
+  const currentAnswer = askingQuestions ? selectedAnswers[currentQuestionIndex!] : undefined;
 
   // Determine which step number corresponds to which section
   let analysisStep = 2;
   let refineStep = hasQuestions ? 3 : -1; // Only relevant if there are questions
   let interpretationStep = hasQuestions ? 4 : 3;
+
+  // Determine if the final sections should be displayed (either no questions, or questions finished, and not refining)
+  const showFinalSections = !isRefining && (!hasQuestions || !askingQuestions);
 
 
   return (
@@ -162,13 +182,14 @@ export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: L
           )}
         </div>
 
-        <Separator />
+        {/* Separator shown if there are questions OR if currently refining */}
+        {(hasQuestions || isRefining) && <Separator />}
 
         {/* Clarifying Questions Section (Step-by-step) */}
-        {hasQuestions && !isRefining && currentQuestion && (
+        {hasQuestions && askingQuestions && currentQuestion && !isRefining && (
           <div>
              <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center">
-                <HelpCircle className="mr-2 h-5 w-5"/>Step {refineStep}: Clarifying Question ({currentQuestionIndex + 1} of {totalQuestions})
+                <HelpCircle className="mr-2 h-5 w-5"/>Step {refineStep}: Clarifying Question ({currentQuestionIndex! + 1} of {totalQuestions})
             </h3>
              <CardDescription className="mb-4 text-sm">
                 Answering these questions helps refine the analysis. Select the best option below.
@@ -179,7 +200,7 @@ export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: L
                  <Label className="font-semibold text-sm mb-3 block">{currentQuestion.question}</Label>
                  <RadioGroup
                      value={currentAnswer}
-                     onValueChange={(value) => handleAnswerChange(currentQuestionIndex, value)}
+                     onValueChange={(value) => handleAnswerChange(currentQuestionIndex!, value)}
                      className="space-y-2"
                      disabled={isRefining}
                  >
@@ -250,29 +271,24 @@ export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: L
             </div>
          )}
 
-        {/* Conditionally render separator if questions were shown OR if we were refining */}
-        {(hasQuestions || isRefining) && <Separator />}
+        {/* Conditionally render separator if questions were finished OR if we are showing final sections and there were questions */}
+        {showFinalSections && hasQuestions && <Separator />}
 
-        {/* Final Interpretation - Conditionally render based on whether questions were asked/answered */}
-        {(!hasQuestions || (hasQuestions && !currentQuestion && !isRefining)) && ( // Show if no questions OR if all questions answered and not refining
-           <>
+
+        {/* --- FINAL SECTIONS START --- */}
+        {/* These sections only show when !isRefining AND (!hasQuestions OR !askingQuestions) */}
+
+         {/* Final Interpretation */}
+         {showFinalSections && (
              <div>
-               <h3 className="text-lg font-semibold text-foreground mb-2">
-                   Step {interpretationStep}: Final Interpretation
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Step {interpretationStep}: Final Interpretation
                 </h3>
-                {isRefining ? ( // Skeleton if interpretation is part of refinement
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-full mt-2"/>
-                        <Skeleton className="h-4 w-5/6 mt-2"/>
-                    </div>
-                ) : (
-                    <CardDescription className="whitespace-pre-wrap">{analysis?.finalInterpretation || "Final interpretation will appear here after analysis."}</CardDescription>
-                )}
+                <CardDescription className="whitespace-pre-wrap">{analysis?.finalInterpretation || "Final interpretation will appear here after analysis."}</CardDescription>
              </div>
-           </>
-        )}
-         {/* Show skeleton for interpretation specifically *while* refining and if there *were* questions */}
-         {isRefining && hasQuestions && (
+         )}
+         {/* Skeleton for interpretation *during* refinement */}
+         {isRefining && (
              <div>
                <h3 className="text-lg font-semibold text-foreground mb-2">Final Interpretation</h3>
                 <Skeleton className="h-4 w-full mt-2"/>
@@ -281,80 +297,69 @@ export function LegalAnalysisDisplay({ analysis, onRefineSubmit, isRefining }: L
          )}
 
 
-         {/* Suggested Phrases - Only show if refinement is done or if there were no questions */}
-          {(!hasQuestions || (hasQuestions && !currentQuestion && !isRefining)) && analysis?.suggestedPhrases && analysis.suggestedPhrases.length > 0 && (
-              <>
+        {/* Suggested Phrases */}
+        {showFinalSections && analysis?.suggestedPhrases && analysis.suggestedPhrases.length > 0 && (
+            <>
                 <Separator />
-                 <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><MessageSquareQuote className="mr-2 h-5 w-5"/>Suggested Phrases</h3>
-                    {isRefining ? (
-                        <div className="space-y-2">
-                           <Skeleton className="h-4 w-1/2 mt-2"/>
-                           <Skeleton className="h-4 w-3/4 mt-2"/>
-                        </div>
-                    ) : (
-                        renderList(analysis.suggestedPhrases, "No specific phrases suggested.")
-                    )}
-                 </div>
-              </>
-         )}
-          {/* Show skeleton for phrases specifically *while* refining and if there *were* questions */}
-         {isRefining && hasQuestions && (
-             <div>
-               <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><MessageSquareQuote className="mr-2 h-5 w-5"/>Suggested Phrases</h3>
-               <Skeleton className="h-4 w-1/2 mt-2"/>
-                <Skeleton className="h-4 w-3/4 mt-2"/>
-             </div>
-         )}
-
-
-         {/* Suggested Actions - Only show if refinement is done or if there were no questions */}
-          {(!hasQuestions || (hasQuestions && !currentQuestion && !isRefining)) && analysis?.suggestedActions && analysis.suggestedActions.length > 0 && (
-               <>
-                 <Separator />
-                  <div>
-                      <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5"/>Suggested Actions</h3>
-                      {isRefining ? (
-                          <div className="space-y-2">
-                             <Skeleton className="h-4 w-1/2 mt-2"/>
-                             <Skeleton className="h-4 w-2/3 mt-2"/>
-                          </div>
-                      ) : (
-                         renderList(analysis.suggestedActions, "No specific actions suggested.")
-                      )}
-                  </div>
-               </>
-           )}
-            {/* Show skeleton for actions specifically *while* refining and if there *were* questions */}
-            {isRefining && hasQuestions && (
                 <div>
-                   <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5"/>Suggested Actions</h3>
-                    <Skeleton className="h-4 w-1/2 mt-2"/>
-                    <Skeleton className="h-4 w-2/3 mt-2"/>
+                    <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><MessageSquareQuote className="mr-2 h-5 w-5"/>Suggested Phrases</h3>
+                    {renderList(analysis.suggestedPhrases, "No specific phrases suggested.")}
                 </div>
-            )}
+            </>
+        )}
+        {/* Skeleton for phrases *during* refinement */}
+        {isRefining && (
+            <div>
+                <Separator />
+                <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><MessageSquareQuote className="mr-2 h-5 w-5"/>Suggested Phrases</h3>
+                <Skeleton className="h-4 w-1/2 mt-2"/>
+                <Skeleton className="h-4 w-3/4 mt-2"/>
+            </div>
+        )}
 
 
-          <Separator />
+        {/* Suggested Actions */}
+        {showFinalSections && analysis?.suggestedActions && analysis.suggestedActions.length > 0 && (
+            <>
+                <Separator />
+                <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5"/>Suggested Actions</h3>
+                    {renderList(analysis.suggestedActions, "No specific actions suggested.")}
+                </div>
+            </>
+        )}
+        {/* Skeleton for actions *during* refinement */}
+        {isRefining && (
+            <div>
+                <Separator />
+                <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5"/>Suggested Actions</h3>
+                <Skeleton className="h-4 w-1/2 mt-2"/>
+                <Skeleton className="h-4 w-2/3 mt-2"/>
+            </div>
+        )}
 
-          {/* Disclaimer - Only show if refinement is done or if there were no questions */}
-           {(!hasQuestions || (hasQuestions && !currentQuestion && !isRefining)) && (
-             <div>
-                 {isRefining ? (
-                      <Skeleton className="h-10 w-full mt-4"/>
-                 ) : (
+
+        {/* Disclaimer */}
+        {showFinalSections && (
+            <>
+                <Separator />
+                <div>
                     <p className="text-xs text-destructive font-medium text-center mt-4">
                         <strong>Disclaimer:</strong> This is an AI-generated analysis based on general interpretations of Indian law for informational purposes only. It does not constitute legal advice. Laws can be complex and vary based on specific facts and jurisdiction. Consult with a qualified legal professional in India for advice specific to your situation.
                     </p>
-                 )}
+                </div>
+            </>
+        )}
+        {/* Skeleton for disclaimer *during* refinement */}
+        {isRefining && (
+             <div>
+                <Separator />
+                <Skeleton className="h-10 w-full mt-4"/>
              </div>
-            )}
-             {/* Show skeleton for disclaimer specifically *while* refining and if there *were* questions */}
-             {isRefining && hasQuestions && <Skeleton className="h-10 w-full mt-4"/>}
+        )}
+        {/* --- FINAL SECTIONS END --- */}
 
       </CardContent>
     </Card>
   );
 }
-
-    
