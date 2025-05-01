@@ -18,16 +18,16 @@ export type MCQ = z.infer<typeof MCQSchema>; // Export the type as well
 
 export const UnderstandLegalIssueInputSchema = z.object({
   scenario: z.string().describe('User description of their legal issue (e.g., "They took my phone").'),
-  keywords: z.string().describe('Keywords related to the legal issue (e.g., phone, warrant).'),
+  // keywords removed
 });
 export type UnderstandLegalIssueInput = z.infer<typeof UnderstandLegalIssueInputSchema>;
 
 
 export const UnderstandLegalIssueOutputSchema = z.object({
-  legalAnalysis: z.string().describe('A legal analysis of the issue based on the provided scenario and keywords, focusing on Indian Law.'),
+  legalAnalysis: z.string().describe('A legal analysis of the issue based on the provided scenario, focusing on Indian Law.'),
   relevantLaw: z.string().optional().describe('The most relevant Indian law or legal article related to the issue.'),
   flowchart: z.string().describe('A textual representation of a flowchart explaining rights and options based on the scenario within the Indian legal context.'),
-  clarifyingQuestions: z.array(MCQSchema).optional().describe('2-4 multiple-choice questions to clarify the user\'s legal standing under Indian Law.'),
+  clarifyingQuestions: z.array(MCQSchema).optional().describe('0 to 5 multiple-choice questions to clarify the user\'s legal standing under Indian Law.'),
   finalInterpretation: z.string().describe('A summary explaining the user\'s legal standing based on the analysis and Indian law.'),
   suggestedPhrases: z.array(z.string()).optional().describe('Exact phrases the user might consider saying in the situation, relevant in India.'),
     suggestedActions: z.array(z.string()).optional().describe('Specific actions the user might consider taking, relevant in India.'),
@@ -42,7 +42,7 @@ export type UnderstandLegalIssueOutput = z.infer<typeof UnderstandLegalIssueOutp
 
 export const RefineLegalIssueInputSchema = z.object({
   originalScenario: z.string().describe("The original scenario provided by the user."),
-  originalKeywords: z.string().describe("The original keywords provided by the user."),
+  // originalKeywords removed
   questionsAndAnswers: z.array(z.object({
     question: z.string(),
     answer: z.string(),
@@ -57,11 +57,12 @@ export const RefineLegalIssueOutputSchema = UnderstandLegalIssueOutputSchema;
 
 // --- Generate Legal Flowchart ---
 
+// Note: This schema is still defined but the flow might be redundant
 export const GenerateLegalFlowchartInputSchema = z.object({
   legalIssueDescription: z // Keep this name consistent with the original flowchart flow for now
     .string()
     .describe('A natural language description of the user\'s legal issue.'),
-  keywords: z.string().describe('Keywords related to the legal issue.'),
+  // keywords removed
   relevantLaw: z.string().optional().describe('The relevant law/article related to the issue.'),
 });
 export type GenerateLegalFlowchartInput = z.infer<typeof GenerateLegalFlowchartInputSchema>;

@@ -29,10 +29,9 @@ const understandLegalIssuePrompt = ai.definePrompt({
   },
   prompt: `You are an AI legal assistant specialized in the Constitution of India and Indian Laws. You help users understand their rights in specific situations within the Indian legal context.
 
-Analyze the user's scenario and keywords provided below. Your entire analysis MUST be based on relevant Indian laws and legal principles.
+Analyze the user's scenario provided below. Your entire analysis MUST be based on relevant Indian laws and legal principles.
 
 User Scenario: {{{scenario}}}
-Keywords: {{{keywords}}}
 
 Based on this information, perform the following tasks:
 
@@ -83,5 +82,3 @@ async input => {
     };
 }
 );
-
-    

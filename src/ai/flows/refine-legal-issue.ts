@@ -4,7 +4,7 @@
 /**
  * @fileOverview This file defines a Genkit flow to refine a user's legal issue analysis based on their answers to clarifying questions, focusing on Indian law.
  *
- * - refineLegalIssue - A function that processes the original scenario, keywords, and user answers to provide a refined legal analysis.
+ * - refineLegalIssue - A function that processes the original scenario and user answers to provide a refined legal analysis.
  */
 
 import {ai} from '@/ai/ai-instance';
@@ -30,7 +30,6 @@ const refineLegalIssuePrompt = ai.definePrompt({
   prompt: `You are an AI legal assistant specialized in the Constitution of India and Indian Laws. You previously provided an initial analysis for the user's scenario. Now, refine that analysis based on the user's answers to the clarifying questions.
 
 Original User Scenario: {{{originalScenario}}}
-Original Keywords: {{{originalKeywords}}}
 
 User's Answers to Clarifying Questions:
 {{#each questionsAndAnswers}}
@@ -80,5 +79,3 @@ async input => {
     };
 }
 );
-
-     

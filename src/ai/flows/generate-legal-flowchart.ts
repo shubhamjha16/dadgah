@@ -25,10 +25,9 @@ const generateLegalFlowchartPrompt = ai.definePrompt({
   },
   prompt: `You are an AI legal assistant that specializes in creating flowcharts to explain user rights and options.
 
-  Based on the user's description of their legal issue and related keywords, construct a flowchart that visualizes the legal process and steps they can take.
+  Based on the user's description of their legal issue and relevant law, construct a flowchart that visualizes the legal process and steps they can take.
 
   Legal Issue Description: {{{legalIssueDescription}}}
-  Keywords: {{{keywords}}}
   Relevant Law (if available): {{{relevantLaw}}}
 
   The flowchart should be easy to understand and provide clear guidance to the user.

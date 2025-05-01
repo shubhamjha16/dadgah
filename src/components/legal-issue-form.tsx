@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
@@ -31,7 +30,7 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
     resolver: zodResolver(legalIssueSchema),
     defaultValues: {
       scenario: "", // Updated default value name
-      keywords: "",
+      // keywords removed
     },
   });
 
@@ -65,26 +64,7 @@ export function LegalIssueForm({ onSubmit, isSubmitting }: LegalIssueFormProps) 
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="keywords"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Keywords</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Example: phone, search, warrant, traffic stop"
-                  disabled={isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                List comma-separated keywords relevant to the scenario.
-              </FormDescription> {/* Updated description */}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Keywords field removed */}
         <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto bg-primary hover:bg-primary/90">
           {isSubmitting ? (
             <>

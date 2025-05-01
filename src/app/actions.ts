@@ -25,7 +25,7 @@ export async function handleUnderstandLegalIssue(data: LegalIssueFormInput): Pro
     // Prepare input for the AI flow
     const input: UnderstandLegalIssueInput = {
       scenario: validatedData.scenario,
-      keywords: validatedData.keywords,
+      // keywords removed
     };
     console.log("Calling understandLegalIssue with input:", input);
     const result = await understandLegalIssue(input);
@@ -58,7 +58,7 @@ export async function handleRefineLegalIssue(data: RefineInput): Promise<ActionR
     // Prepare input for the AI refinement flow
     const input: RefineLegalIssueInput = {
       originalScenario: validatedData.originalScenario,
-      originalKeywords: validatedData.originalKeywords,
+      // originalKeywords removed
       questionsAndAnswers: validatedData.questionsAndAnswers,
     };
 

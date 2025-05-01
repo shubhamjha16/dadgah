@@ -9,7 +9,7 @@ import { MCQSchema } from "@/ai/schemas/legal-issue-types"; // Import MCQSchema
 // Schema for the initial form input
 export const legalIssueSchema = z.object({
   scenario: z.string().min(10, "Please provide a more detailed description of the scenario."),
-  keywords: z.string().min(3, "Please provide at least one keyword."),
+  // keywords removed
 });
 
 // Type derived from the form schema
@@ -20,7 +20,7 @@ export type LegalIssueFormInput = z.infer<typeof legalIssueSchema>;
 // Schema for the input needed to refine the analysis
 export const RefineInputSchema = z.object({
   originalScenario: z.string().describe("The original scenario provided by the user."),
-  originalKeywords: z.string().describe("The original keywords provided by the user."),
+  // originalKeywords removed
   questionsAndAnswers: z.array(z.object({
     question: z.string(),
     answer: z.string(),

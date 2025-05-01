@@ -14,7 +14,7 @@ import { Scale } from 'lucide-react'; // Icon for Dadgah (using Scale for now)
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 
 export default function Home() {
-  const [originalInput, setOriginalInput] = useState<LegalIssueFormInput | null>(null); // Store original form data
+  const [originalInput, setOriginalInput] = useState<LegalIssueFormInput | null>(null); // Store original form data (without keywords)
   const [analysisResult, setAnalysisResult] = useState<UnderstandLegalIssueOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefining, setIsRefining] = useState(false); // State for refinement loading
@@ -28,7 +28,7 @@ export default function Home() {
 
   const handleFormSubmit = async (data: LegalIssueFormInput): Promise<ActionResponse> => {
     setIsLoading(true);
-    setOriginalInput(data); // Store the submitted data
+    setOriginalInput(data); // Store the submitted data (scenario only)
     setAnalysisResult(null); // Clear previous results
 
     let response: ActionResponse = { success: false, message: 'An unexpected error occurred.' };
@@ -85,8 +85,8 @@ export default function Home() {
 
   // Function to handle the submission of MCQ answers for refinement
   const handleRefineSubmit = async (answers: Record<number, string>) => {
-    if (!originalInput || !analysisResult?.clarifyingQuestions) {
-      toast({ title: "Error", description: "Missing original input or questions for refinement.", variant: "destructive" });
+    if (!originalInput?.scenario || !analysisResult?.clarifyingQuestions) {
+      toast({ title: "Error", description: "Missing original scenario or questions for refinement.", variant: "destructive" });
       return;
     }
 
@@ -100,7 +100,7 @@ export default function Home() {
 
     const refineData: RefineInput = {
       originalScenario: originalInput.scenario,
-      originalKeywords: originalInput.keywords,
+      // originalKeywords removed
       questionsAndAnswers: questionsAndAnswers,
     };
 
