@@ -5,8 +5,9 @@ import React, { useState, startTransition } from 'react';
 import { LegalIssueForm } from "@/components/legal-issue-form";
 import { LegalAnalysisDisplay } from "@/components/legal-analysis-display";
 import { handleUnderstandLegalIssue } from "@/app/actions";
-import type { LegalIssueFormInput, ActionResponse } from "@/app/actions";
-import type { UnderstandLegalIssueOutput } from "@/ai/schemas/legal-issue-types"; // Updated import path
+// Update imports for types previously in actions.ts
+import type { LegalIssueFormInput, ActionResponse } from "@/app/types";
+import type { UnderstandLegalIssueOutput } from "@/ai/schemas/legal-issue-types";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scale } from 'lucide-react'; // Icon for Ius

@@ -11,23 +11,10 @@ import type {
   GenerateLegalFlowchartInput,
   GenerateLegalFlowchartOutput
 } from "@/ai/schemas/legal-issue-types";
+// Import form/action related types and schemas from the new types file
+import type { LegalIssueFormInput, ActionResponse } from "@/app/types";
+import { legalIssueSchema } from "@/app/types";
 
-// Schema for the form input, potentially reusable or define separately if it diverges
-export const legalIssueSchema = z.object({
-  description: z.string().min(10, "Please provide a more detailed description."),
-  keywords: z.string().min(3, "Please provide at least one keyword."),
-});
-
-export type LegalIssueFormInput = z.infer<typeof legalIssueSchema>;
-
-// Define a more specific ActionResponse type if possible, or keep generic
-export type ActionResponse = {
-  success: boolean;
-  message?: string;
-  // Use a union type for data if the action can return different result types
-  data?: UnderstandLegalIssueOutput | GenerateLegalFlowchartOutput | null;
-  error?: unknown; // Consider more specific error typing if needed
-};
 
 /**
  * Server action to call the understandLegalIssue GenAI flow.

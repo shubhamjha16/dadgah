@@ -3,8 +3,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import type { LegalIssueFormInput } from "@/app/actions";
-import { legalIssueSchema } from "@/app/actions";
+// Update imports for types/schema previously in actions.ts
+import type { LegalIssueFormInput, ActionResponse } from "@/app/types";
+import { legalIssueSchema } from "@/app/types";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-import type { ActionResponse } from "@/app/actions";
+
 
 interface LegalIssueFormProps {
   onSubmit: (data: LegalIssueFormInput) => Promise<ActionResponse>;
